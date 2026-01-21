@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}ReEdu | Admin panel{% endblock %}
+{% block content %}
+  <section class="section">
+    <h2>Admin paneli</h2>
+
+    <div class="card">
+      <h3>Gözləyən müəllimlər</h3>
+      <div class="list">
+        {% for teacher in pending_teachers %}
+          <div class="list-item">
+            <strong>{{ teacher.user.first_name }} {{ teacher.user.last_name }}</strong>
+            <div class="muted">{{ teacher.subject }} | {{ teacher.user.email }}</div>
+            <form method="post" action="{{ url_for('approve_teacher', teacher_id=teacher.id) }}">
+              <button class="btn btn-primary" type="submit">Təsdiqlə</button>
+            </form>
+            <form method="post" action="{{ url_for('reject_teacher', teacher_id=teacher.id) }}">
+              <button class="btn" type="submit">Ləğv et</button>
+            </form>
+          </div>
+        {% else %}
+          <p class="muted">Gözləyən müəllim yoxdur.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Bütün müəllimlər</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ad Soyad</th>
+            <th>Fənn</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for teacher in teachers %}
+            <tr>
+              <td>{{ teacher.user.first_name }} {{ teacher.user.last_name }}</td>
+              <td>{{ teacher.subject }}</td>
+              <td>{{ teacher.status }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3">Müəllim yoxdur.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Şagirdlər</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ad Soyad</th>
+            <th>Sinif</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+            <tr>
+              <td>{{ student.user.first_name }} {{ student.user.last_name }}</td>
+              <td>{{ student.grade }}</td>
+              <td>{{ student.user.email }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3">Şagird yoxdur.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Abunəliklər</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Şagird</th>
+            <th>Müəllim</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sub in subscriptions %}
+            <tr>
+              <td>{{ sub.student.first_name }} {{ sub.student.last_name }}</td>
+              <td>{{ sub.teacher.first_name }} {{ sub.teacher.last_name }}</td>
+              <td>{{ sub.status }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3">Abunəlik yoxdur.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Dərs cədvəlləri</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Müəllim</th>
+            <th>Şagird</th>
+            <th>Başlama</th>
+            <th>Bitmə</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for schedule in schedules %}
+            <tr>
+              <td>{{ schedule.teacher.first_name }} {{ schedule.teacher.last_name }}</td>
+              <td>{{ schedule.student.first_name }} {{ schedule.student.last_name }}</td>
+              <td>{{ schedule.start_time.strftime("%d.%m.%Y %H:%M") }}</td>
+              <td>{{ schedule.end_time.strftime("%d.%m.%Y %H:%M") }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="4">Cədvəl yoxdur.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>Canlı dərslər</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Müəllim</th>
+            <th>Başlıq</th>
+            <th>Vaxt</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for session in live_sessions %}
+            <tr>
+              <td>{{ session.teacher.first_name }} {{ session.teacher.last_name }}</td>
+              <td>{{ session.title }}</td>
+              <td>
+                {% if session.scheduled_at %}
+                  {{ session.scheduled_at.strftime("%d.%m.%Y %H:%M") }}
+                {% else %}
+                  Vaxt təyin edilməyib
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3">Canlı dərs yoxdur.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

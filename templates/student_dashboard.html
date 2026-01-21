@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}ReEdu | Şagird paneli{% endblock %}
+{% block content %}
+  <section class="section">
+    <h2>Şagird paneli</h2>
+    <div class="layout">
+      <aside class="sidebar">
+        <h3>Haqqımızda</h3>
+        <p class="muted">Şagirdlər üçün ən uyğun müəllimi tapmaq və resursları izləmək üçün ReEdu.</p>
+        <h3 style="margin-top: 18px;">Əlaqə</h3>
+        <p class="muted">support@reedu.az</p>
+        <p class="muted">+994 51 000 00 00</p>
+      </aside>
+
+      <div class="list">
+        <div class="card">
+          <h3>Müəllim axtarışı</h3>
+          <form method="get" action="{{ url_for('student_dashboard') }}">
+            <div class="form-group">
+              <label>Fənn seçimi</label>
+              <input type="text" name="subject" value="{{ subject }}" placeholder="Riyaziyyat, İngilis dili..." />
+            </div>
+            <button class="btn btn-primary" type="submit">Axtar</button>
+          </form>
+          <div class="card-grid" style="margin-top: 16px;">
+            {% for teacher in teachers %}
+              <div class="list-item">
+                <strong>{{ teacher.user.first_name }} {{ teacher.user.last_name }}</strong>
+                <div class="muted">{{ teacher.subject }}</div>
+                <div class="muted">Qiymət: {{ "%.2f"|format(teacher.rate) }} AZN</div>
+                {% set stats = rating_map.get(teacher.user.id) %}
+                <div class="muted">
+                  Reytinq:
+                  {% if stats %}
+                    {{ "%.1f"|format(stats["avg"]) }} / 5 ({{ stats["count"] }})
+                  {% else %}
+                    0 / 5 (0)
+                  {% endif %}
+                </div>
+                <form method="post" action="{{ url_for('subscribe_teacher', teacher_user_id=teacher.user.id) }}">
+                  <button class="btn btn-accent" type="submit">Abunə ol (demo)</button>
+                </form>
+              </div>
+            {% else %}
+              <p class="muted">Uyğun müəllim tapılmadı.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Chat və əlaqə</h3>
+          <form method="post" action="{{ url_for('send_message') }}">
+            <div class="form-group">
+              <label>Müəllim seç</label>
+              <select name="receiver_id" required>
+                {% for sub in subscriptions %}
+                  <option value="{{ sub.teacher.id }}">{{ sub.teacher.first_name }} {{ sub.teacher.last_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Mesaj</label>
+              <textarea name="body" required></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Göndər</button>
+          </form>
+          <div class="list" style="margin-top: 16px;">
+            {% for message in messages %}
+              <div class="list-item">
+                <strong>{{ message.sender.first_name }}:</strong> {{ message.body }}
+              </div>
+            {% else %}
+              <p class="muted">Hələ mesaj yoxdur.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Abunəliklərim və materiallar</h3>
+          <div class="list">
+            {% for sub in subscriptions %}
+              <div class="list-item">
+                <strong>{{ sub.teacher.first_name }} {{ sub.teacher.last_name }}</strong>
+                <div class="muted">{{ sub.teacher.teacher_profile.subject }}</div>
+                {% set stats = rating_map.get(sub.teacher.id) %}
+                <div class="muted">
+                  Reytinq:
+                  {% if stats %}
+                    {{ "%.1f"|format(stats["avg"]) }} / 5 ({{ stats["count"] }})
+                  {% else %}
+                    0 / 5 (0)
+                  {% endif %}
+                </div>
+                <form method="post" action="{{ url_for('submit_rating') }}">
+                  <input type="hidden" name="teacher_id" value="{{ sub.teacher.id }}" />
+                  <label class="muted" style="display: block; margin-top: 8px;">Reytinq ver</label>
+                  <select name="score">
+                    {% for value in [1,2,3,4,5] %}
+                      <option value="{{ value }}" {% if student_ratings.get(sub.teacher.id) == value %}selected{% endif %}>
+                        {{ value }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn" type="submit">Göndər</button>
+                </form>
+              </div>
+            {% else %}
+              <p class="muted">Hələ abunəlik yoxdur.</p>
+            {% endfor %}
+          </div>
+          <div class="list" style="margin-top: 16px;">
+            {% for material in materials %}
+              <div class="list-item">
+                <strong>{{ material.title }}</strong>
+                <div class="muted">{{ material.description }}</div>
+                <a class="btn" href="{{ url_for('download_material', material_id=material.id) }}">Görüntülə</a>
+              </div>
+            {% else %}
+              <p class="muted">Abunəlikdən sonra materiallar burada görünəcək.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Dərs cədvəli və bildirişlər</h3>
+          <p class="muted">
+            Dərs vaxtı yaxınlaşanda telefon bildirişi üçün push servis inteqrasiyası nəzərdə tutulur.
+          </p>
+          <div class="list" style="margin-top: 16px;">
+            {% for schedule in schedules %}
+              <div class="list-item">
+                <strong>{{ schedule.teacher.first_name }} {{ schedule.teacher.last_name }}</strong>
+                <div class="muted">
+                  {{ schedule.start_time.strftime("%d.%m.%Y %H:%M") }} - {{ schedule.end_time.strftime("%H:%M") }}
+                </div>
+              </div>
+            {% else %}
+              <p class="muted">Hələ cədvəl yoxdur.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

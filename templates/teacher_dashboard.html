@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}ReEdu | Müəllim paneli{% endblock %}
+{% block content %}
+  <section class="section">
+    <h2>Müəllim paneli</h2>
+    {% if profile and profile.status != "approved" %}
+      <div class="notice">
+        Profiliniz hazırda <strong>{{ profile.status }}</strong> statusundadır.
+        Admin təsdiqindən sonra bütün funksiyalar aktiv olacaq.
+      </div>
+    {% endif %}
+
+    <div class="layout">
+      <aside class="sidebar">
+        <h3>Haqqımızda</h3>
+        <p class="muted">ReEdu müəllim və şagirdləri çevik cədvəl, canlı dərs və material paylaşımı ilə birləşdirir.</p>
+        <h3 style="margin-top: 18px;">Əlaqə</h3>
+        <p class="muted">support@reedu.az</p>
+        <p class="muted">+994 51 000 00 00</p>
+      </aside>
+
+      <div class="list">
+        <div class="card">
+          <h3>Şagirdlərlə chat</h3>
+          <form method="post" action="{{ url_for('send_message') }}">
+            <div class="form-group">
+              <label>Şagird seç</label>
+              <select name="receiver_id" required>
+                {% for sub in subscriptions %}
+                  <option value="{{ sub.student.id }}">{{ sub.student.first_name }} {{ sub.student.last_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Mesaj</label>
+              <textarea name="body" required></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Göndər</button>
+          </form>
+          <div class="list" style="margin-top: 16px;">
+            {% for message in messages %}
+              <div class="list-item">
+                <strong>{{ message.sender.first_name }}:</strong> {{ message.body }}
+              </div>
+            {% else %}
+              <p class="muted">Hələ mesaj yoxdur.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Video və material əlavə et</h3>
+          <form method="post" action="{{ url_for('upload_material') }}" enctype="multipart/form-data">
+            <div class="form-group">
+              <label>Başlıq</label>
+              <input type="text" name="title" required />
+            </div>
+            <div class="form-group">
+              <label>Təsvir</label>
+              <textarea name="description"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Fayl (PDF/JPG/PNG/MP4)</label>
+              <input type="file" name="file" required />
+            </div>
+            <button class="btn btn-accent" type="submit">Yüklə</button>
+          </form>
+          <div class="list" style="margin-top: 16px;">
+            {% for material in materials %}
+              <div class="list-item">
+                <strong>{{ material.title }}</strong> ({{ material.kind }})
+                <div class="muted">{{ material.description }}</div>
+                <a class="btn" href="{{ url_for('download_material', material_id=material.id) }}">Yüklə</a>
+              </div>
+            {% else %}
+              <p class="muted">Hələ material əlavə edilməyib.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Canlı dərs başlat</h3>
+          <form method="post" action="{{ url_for('create_live_session') }}">
+            <div class="form-group">
+              <label>Dərs başlığı</label>
+              <input type="text" name="title" required />
+            </div>
+            <div class="form-group">
+              <label>Tarix və vaxt</label>
+              <input type="datetime-local" name="scheduled_at" />
+            </div>
+            <button class="btn btn-primary" type="submit">Dərsi planla</button>
+          </form>
+          <div class="list" style="margin-top: 16px;">
+            {% for session in live_sessions %}
+              <div class="list-item">
+                <strong>{{ session.title }}</strong>
+                <div class="muted">
+                  {% if session.scheduled_at %}{{ session.scheduled_at.strftime("%d.%m.%Y %H:%M") }}{% else %}Vaxt göstərilməyib{% endif %}
+                </div>
+              </div>
+            {% else %}
+              <p class="muted">Hələ canlı dərs planlanmayıb.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Dərs cədvəli qur</h3>
+          <form method="post" action="{{ url_for('create_schedule') }}">
+            <div class="form-group">
+              <label>Şagird</label>
+              <select name="student_id" required>
+                {% for sub in subscriptions %}
+                  <option value="{{ sub.student.id }}">{{ sub.student.first_name }} {{ sub.student.last_name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Başlama vaxtı</label>
+              <input type="datetime-local" name="start_time" required />
+            </div>
+            <div class="form-group">
+              <label>Bitmə vaxtı</label>
+              <input type="datetime-local" name="end_time" required />
+            </div>
+            <button class="btn btn-primary" type="submit">Cədvəl yarat</button>
+          </form>
+          <div class="list" style="margin-top: 16px;">
+            {% for schedule in schedules %}
+              <div class="list-item">
+                <strong>{{ schedule.student.first_name }} {{ schedule.student.last_name }}</strong>
+                <div class="muted">
+                  {{ schedule.start_time.strftime("%d.%m.%Y %H:%M") }} - {{ schedule.end_time.strftime("%H:%M") }}
+                </div>
+              </div>
+            {% else %}
+              <p class="muted">Hələ cədvəl yoxdur.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

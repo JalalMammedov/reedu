@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="az">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}ReEdu{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-row">
+        <div class="brand">
+          <strong>ReEdu</strong>
+          <span>Onlayn hazirliq kursu platformasi</span>
+        </div>
+        <nav class="nav-links">
+          <a href="{{ url_for('index') }}">Əsas</a>
+          <a href="{{ url_for('teachers') }}">Müəllimlər</a>
+          <a href="{{ url_for('pricing') }}">Qiymətlər</a>
+          <a href="{{ url_for('contact') }}">Əlaqə</a>
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('dashboard') }}">Kabinet</a>
+          {% endif %}
+        </nav>
+        <div class="nav-actions">
+          {% if current_user.is_authenticated %}
+            <a class="btn" href="{{ url_for('logout') }}">Çıxış</a>
+          {% else %}
+            <a class="btn" href="{{ url_for('login') }}">Daxil ol</a>
+            <a class="btn btn-primary" href="{{ url_for('register_choice') }}">Qeydiyyat</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for message in messages %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-links">
+        <a href="{{ url_for('index') }}">Haqqımızda</a>
+        <a href="{{ url_for('contact') }}">Əlaqə</a>
+        <a href="{{ url_for('pricing') }}">Qiymətlər</a>
+      </div>
+    </footer>
+  </body>
+</html>

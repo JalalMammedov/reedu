@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}ReEdu | Qiymətlər{% endblock %}
+{% block content %}
+  <section class="section">
+    <h2>Qiymətlər</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Standart</h3>
+        <p class="muted">Həftədə 2 dərs, məhdud müəllim seçimi.</p>
+        <div style="font-size: 28px; font-weight: 700; margin-top: 16px;">Standart</div>
+        <button class="btn btn-primary" type="button">Al</button>
+      </div>
+
+      <div class="card">
+        <h3>Premium</h3>
+        <p class="muted">Həftədə 3 dərs, prioritet müəllim seçimi.</p>
+        <div style="font-size: 28px; font-weight: 700; margin-top: 16px;">29 AZN / ay</div>
+        <button class="btn btn-primary" type="button">Premium al</button>
+      </div>
+
+      <div class="card">
+        <h3>Pro</h3>
+        <p class="muted">Həftədə 4-5 dərs, xüsusi müəllimlər.</p>
+        <div style="font-size: 28px; font-weight: 700; margin-top: 16px;">49 AZN / ay</div>
+        <button class="btn btn-primary" type="button">Pro al</button>
+      </div>
+    </div>
+  </section>
+{% endblock %}

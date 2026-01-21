@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}ReEdu | Müəllimlər{% endblock %}
+{% block content %}
+  <section class="section">
+    <h2>Müəllimləri axtarın</h2>
+    <form class="form-card" method="get" action="{{ url_for('teachers') }}">
+      <div class="form-group">
+        <label>Fənn üzrə axtarış</label>
+        <input type="text" name="subject" value="{{ subject }}" placeholder="Məsələn, Riyaziyyat" />
+      </div>
+      <button class="btn btn-primary" type="submit">Axtar</button>
+    </form>
+  </section>
+
+  <section class="section">
+    <div class="card-grid">
+      {% for teacher in teachers %}
+        <div class="card">
+          <span class="badge">{{ teacher.subject }}</span>
+          <h3>{{ teacher.user.first_name }} {{ teacher.user.last_name }}</h3>
+          <p class="muted">{{ teacher.bio }}</p>
+          <p class="muted">Qiymət: {{ "%.2f"|format(teacher.rate) }} AZN</p>
+          {% set stats = rating_map.get(teacher.user.id) %}
+          <p class="muted">
+            Reytinq:
+            {% if stats %}
+              {{ "%.1f"|format(stats["avg"]) }} / 5 ({{ stats["count"] }})
+            {% else %}
+              0 / 5 (0)
+            {% endif %}
+          </p>
+          {% if current_user.is_authenticated and current_user.role == "student" %}
+            <form method="post" action="{{ url_for('subscribe_teacher', teacher_user_id=teacher.user.id) }}">
+              <button class="btn btn-accent" type="submit">Abunə ol</button>
+            </form>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="muted">Axtarışınıza uyğun müəllim tapılmadı.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
